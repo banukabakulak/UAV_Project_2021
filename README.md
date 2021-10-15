@@ -11,7 +11,7 @@ The project is being done under the guidance of [Robogör](https://robogor.com/)
 # TODO List
 
 > **Prerequisities**
-- [] Read the Uluhansın et al. (2019) and Aloush et al. (2020) final project reports.
+- [] Read the [Uluhansın et al. (2019)](https://drive.google.com/file/d/1SvxjoTgBtMhEw7FkK61PPhNAt3kecfEz/view?usp=sharing) and [Aloush et al. (2020)](https://drive.google.com/open?id=1xy0_IOHqHzSTdkWK07TeWwX-RwiO4Jf7&authuser=banu.kabakulak%40gmail.com&usp=drive_fs) final project reports.
 - [] Multi-drone flight via Router. The WiFi connection of the computer can be preserved via a WiFi USB dongle. 
 
 <img src="https://m.media-amazon.com/images/I/41jw7BtdfFL._AC_UL480_FMwebp_QL65_.jpg" width="100" height="200"><img src="https://productimages.hepsiburada.net/s/6/550/9728714801202.jpg/format:webp" width="200" height="200">
