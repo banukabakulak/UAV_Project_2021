@@ -27,6 +27,7 @@ lists all the IP addresses in your network with command ``arp -a``
 - [] The control commands should be given as the velocities  ``(v_x, v_y, v_z)`` in 3D, together with the heading angle ``alpha``. 
 - [] Prepare a presentation on the flight dynamics of a drone. 
 - [] Install AirSim on computer. Here is our meeting record for [AirSim Installation](https://youtu.be/0_iNuuqMBHI). 
+- [] Design a Graphical User Interface (GUI) in Python and publish the results in a ``.html`` file. 
 
 > **Literature Review**
 - [] Investigate Particle Swarm Optimization method. 
