@@ -1,5 +1,7 @@
 # UAV_Project_2021
-This is the repository for the UAV project in year 2021. The team consists of Ertuğrul Taparcı, Melisa Gülhan Ada, İpek Yıldırım, and Sena Öztürk.
+This is the repository for the UAV project in year 2021. 
+
+The team consists of Ertuğrul Taparcı, Melisa Gülhan Ada, İpek Yıldırım, and Sena Öztürk.
 
 <img src="https://robogor.com/wp-content/uploads/robogor-logo.png " width="200" height="100">
 
@@ -10,8 +12,11 @@ The project is being done under the guidance of [Robogör](https://robogor.com/)
 
 > **Prerequisities**
 - [] Read the Uluhansın et al. (2019) and Aloush et al. (2020) final project reports.
-- [] Multi-drone flight via router. Here is Bashar's tutorial: 
-  [PacketSender](https://youtu.be/T4ISyGfzwqI).
+- [] Multi-drone flight via Router. The WiFi connection of the computer can be preserved via a WiFi USB dongle. 
+
+<img src="https://m.media-amazon.com/images/I/41jw7BtdfFL._AC_UL480_FMwebp_QL65_.jpg" width="100" height="200"><img src="https://productimages.hepsiburada.net/s/6/550/9728714801202.jpg/format:webp" width="200" height="200">
+
+Here is Bashar's tutorial for router connection via [PacketSender](https://youtu.be/T4ISyGfzwqI).
   
   [Address Resolution Protocol (ARP)](https://www.youtube.com/watch?v=v_tI6B2bicM)
 lists all the IP addresses in your network with command ``arp -a``
@@ -19,8 +24,12 @@ lists all the IP addresses in your network with command ``arp -a``
 
 > **In This Project**
 - [] Get the state of a Tello drone via Python. Here is the [Tello GitHub](https://github.com/damiafuentes/DJITelloPy/blob/master/djitellopy/tello.py) page.
+- [] The control commands should be given as the velocities  ``(v_x, v_y, v_z)`` in 3D, together with the heading angle ``alpha``. 
 - [] Prepare a presentation on the flight dynamics of a drone. 
 - [] Install AirSim on computer. Here is our meeting record for [AirSim Installation](https://youtu.be/0_iNuuqMBHI). 
 
 > **Literature Review**
 - [] Investigate Particle Swarm Optimization method. 
+
+> **General**
+- [] Register to a İHA1 training camp. 
