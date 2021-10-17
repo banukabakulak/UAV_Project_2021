@@ -28,7 +28,7 @@ lists all the IP addresses in your network with command ``arp -a``
 
 > **In This Project**
 - [] Get the state of a Tello drone via Python. Here is the [Tello GitHub](https://github.com/damiafuentes/DJITelloPy/blob/master/djitellopy/tello.py) page.
-- [] The control commands should be given as the velocities  ``(v_x, v_y, v_z)`` in 3D, together with the heading angle ``alpha``. 
+- [] The control commands should be given as the velocities  ``(v_x, v_y, v_z)`` in 3D, together with the heading (yaw) angle ``alpha``. 
 - [] Prepare a presentation on the flight dynamics of a drone. 
 - [] Install AirSim on computer. Here is our meeting record for [AirSim](https://youtu.be/0_iNuuqMBHI) installation. 
 - [] Design a Graphical User Interface (GUI) in Python and publish the results in a ``.html`` file. 
