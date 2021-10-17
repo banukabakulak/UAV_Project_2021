@@ -22,11 +22,15 @@ Here is Bashar's tutorial for router connection via [PacketSender](https://youtu
 lists all the IP addresses in your network with command ``arp -a``
 - [] Read the literature in the previous year reports. 
 
+> **Tutorials**
+- [] Drone Flight Dynamics can be seen [here](https://www.youtube.com/watch?v=C0KBu2ihp-s).
+- [] Drone Programming with Python can be seen in the [Murtaza's Workshop](https://www.youtube.com/watch?v=LmEcyQnfpDA) channel. 
+
 > **In This Project**
 - [] Get the state of a Tello drone via Python. Here is the [Tello GitHub](https://github.com/damiafuentes/DJITelloPy/blob/master/djitellopy/tello.py) page.
 - [] The control commands should be given as the velocities  ``(v_x, v_y, v_z)`` in 3D, together with the heading angle ``alpha``. 
 - [] Prepare a presentation on the flight dynamics of a drone. 
-- [] Install AirSim on computer. Here is our meeting record for [AirSim Installation](https://youtu.be/0_iNuuqMBHI). 
+- [] Install AirSim on computer. Here is our meeting record for [AirSim](https://youtu.be/0_iNuuqMBHI) installation. 
 - [] Design a Graphical User Interface (GUI) in Python and publish the results in a ``.html`` file. 
 
 > **Literature Review**
