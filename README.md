@@ -23,7 +23,7 @@ lists all the IP addresses in your network with command ``arp -a``
 - [] Read the literature in the previous year reports. 
 
 > **Tutorials**
-- [] Drone Flight Dynamics can be seen [here](https://www.youtube.com/watch?v=C0KBu2ihp-s).
+- [] Drone Flight Dynamics can be seen [here](https://www.youtube.com/watch?v=C0KBu2ihp-s) and [here](https://www.youtube.com/watch?v=N_XneaFmOmU).
 - [] Drone Programming with Python can be seen in the [Murtaza's Workshop](https://www.youtube.com/watch?v=LmEcyQnfpDA) channel. 
 
 > **In This Project**
