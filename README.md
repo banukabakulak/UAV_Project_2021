@@ -20,6 +20,7 @@ Here is Bashar's tutorial for router connection via [PacketSender](https://youtu
   
   [Address Resolution Protocol (ARP)](https://www.youtube.com/watch?v=v_tI6B2bicM)
 lists all the IP addresses in your network with command ``arp -a``
+``netstat -a``
 - [] Read the literature in the previous year reports. 
 
 > **Tutorials**
