@@ -23,6 +23,12 @@ lists all the IP addresses in your network with command ``arp -a``
 ``netstat -a``
 - [] Read the literature in the previous year reports. 
 
+> **TCP vs UDP**
+
+Transmission Control Protocol (TCP) checks whether the message is received by the receiver. User Datagram Protocol (UDP) is faster but more unreliable than TCP since it does not check the transmission success. UDP is useful for sound and video transmission. 
+
+<img src="https://multimediabilgisayar.com/wp-content/uploads/2018/01/%C4%B0P-UDP.jpeg" width="400" height="300">
+
 > **Tutorials**
 - [] Drone Flight Dynamics can be seen [here](https://www.youtube.com/watch?v=C0KBu2ihp-s) and [here](https://www.youtube.com/watch?v=N_XneaFmOmU).
 - [] Drone Programming with Python can be seen in the [Murtaza's Workshop](https://www.youtube.com/watch?v=LmEcyQnfpDA) channel. 
