@@ -209,8 +209,8 @@ class Optimization():
             instance.TypeAgents.append(i.getType()) if i.getType() not in instance.TypeAgents else instance.TypeAgents
             instance.Agents.append(i)
             if i.getType() != 0:
-                instance.TypeUAV.append(i.getType())
-                instance.UAVs.append(i)
+                instance.TypeUAV.append(i.getType()) if i.getType() not in instance.TypeUAV else instance.TypeUAV
+                instance.UAVs.append(i) if i not in instance.UAVs else instance.UAVs
             else:
                 instance.UGVs.append(i)
 
@@ -223,8 +223,6 @@ class Optimization():
         instance.initializeBoundaryCells()
 
         # decrease some cells from the boundary cells due to denied zone:
-        for i in range(5):
-            instance.BoundryCells.pop()
 
         # Let's calculate Stage 2:
         swarmModel2 = Model('stage2')
@@ -234,9 +232,6 @@ class Optimization():
         R_l = instance.TypeAgents
         R_i = instance.AgentIndexSet
         R_j = range(0, len(instance.BoundryCells))
-
-        print(R_l)
-        print(R_i)
 
         # Define IDs:
         idt = [t for t in R_t]
@@ -258,8 +253,6 @@ class Optimization():
         print('idz', idz[2][2])
 
         # Define decision variables:
-
-        x = swarmModel2.binary_var_dict(idx, name="x")
         z = swarmModel2.binary_var_dict(idz, name="z")
 
         for (l, i, j, t) in idz:
@@ -274,7 +267,7 @@ class Optimization():
                     assignment_2 += swarmModel2.sum(z[l, i, j, t])
             swarmModel2.add_constraint(assignment_2 == 1)
 
-        for j in R_j:
+        for j in idj:
             assignment_3 = swarmModel2.linear_expr()
             for x, y in idx:
                 assignment_3 += swarmModel2.sum(z[x, y, j, 0])
@@ -298,8 +291,10 @@ class Optimization():
 
         solution2 = swarmModel2.solve(log_output=False)
         # assert solution, "solve failed"
-        swarmModel2.report()
+        #swarmModel2.report()
         solution2.display()
 
         # swarmModel1.export_as_lp("swarmModel1.lp")
         # solution2.export("C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/solution2.json")
+
+

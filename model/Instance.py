@@ -160,7 +160,6 @@ class Instance():
             self.Agents.append(newAgent)
 
     def edgeLengthDetermination(self):
-        # self.readInstance('Agents.csv')
 
         scanTime = []
 
@@ -250,7 +249,7 @@ class Instance():
                     #self.Cells[-1].print()
 
     def initializeBoundaryCells(self):
-        for i in range(self.nCol - 2):
+        for i in range(self.nCol - 1):
             self.BoundryCells.append(self.Cells[i])
 
         for i in range(self.nRow - 1):
@@ -262,10 +261,7 @@ class Instance():
 
     def distanceBtwBaseLocationAndBoundaryCells(self):
 
-        #n = len(self.Agents)
-        #distance_matrix = [[0] * n for i in range(n)]
         distance_matrix = [[0 for col in range(len(self.BoundryCells))] for row in range(len(self.Agents))]
-
 
         r = 0
 
