@@ -1,21 +1,38 @@
 import airsim
 import formation
 import time
+import multiprocessing
 
 # connect to the AirSim simulator
-from model.Swarm import chosen_drones
+from model.Optimization import Optimization
 
 client = airsim.MultirotorClient()
 client.confirmConnection()
 
-chosen_list = chosen_drones('solution.json')
+
+opti = Optimization()
+opti.Stage1()
+chosen_list = opti.chosen_drones()
+
+f_list = []
 
 for j in chosen_list:
     j.printAgent()
     client.enableApiControl(True, j.getName())
     client.armDisarm(True, j.getName())
-    f = client.takeoffAsync(vehicle_name=j.getName())
+    f_list.append(client.takeoffAsync(vehicle_name=j.getName()))
+
+for c in f_list:
+    c.join()
+
+f_list.clear()
+
+for j in chosen_list:
+    f_list.append(client.moveByVelocityAsync(0, 0, -20, 5, vehicle_name=j.getName()))
+
+for f in f_list:
     f.join()
+
 
 """
 # airsim.wait_key('Press any key to takeoff')

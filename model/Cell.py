@@ -21,3 +21,14 @@ class Cell():
         self.deniedCorner4 = None
         self.deniedEdgeLength = None
 
+    def print(self):
+        print(
+            f'id {self.Id}, center {self.center}, corner1 {self.corner1}, corner2 {self.corner2}, corner3 {self.corner3}, corner4 {self.corner4}, row {self.row}, col {self.col} ')
+
+    def printID(self):
+        print(f'id {self.Id}')
+
+    def getID(self):
+        return int(self.Id)
+
+

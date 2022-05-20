@@ -75,6 +75,8 @@ class Agent():
     def getBasePosition(self):
         return self.basePosition
 
+    def getType(self):
+        return self.type
 
 
 
