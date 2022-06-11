@@ -1,23 +1,32 @@
 import airsim
 import formation
 import time
-import multiprocessing
 
 # connect to the AirSim simulator
+from model.model_definition.Instance import Instance
 from model.Optimization import Optimization
 
 client = airsim.MultirotorClient()
 client.confirmConnection()
 
-
+ins = Instance()
+ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
 opti = Optimization()
-opti.Stage1()
-chosen_list = opti.chosen_drones()
+
+opti.Stage1(ins)
+opti.Stage2(ins)
+
+a = ins.communicationGraph()
+print(ins.distanceMatrixOfAgents(a))
+print(ins.connectivity_matrix(ins.graphForBFS(a)))
 
 f_list = []
 
-for j in chosen_list:
+for j in ins.Agents:
     j.printAgent()
+    print('base position:', j.getBasePosition())
+    print('current cell:')
+    j.getCurrCell().print()
     client.enableApiControl(True, j.getName())
     client.armDisarm(True, j.getName())
     f_list.append(client.takeoffAsync(vehicle_name=j.getName()))
@@ -27,38 +36,48 @@ for c in f_list:
 
 f_list.clear()
 
-for j in chosen_list:
-    f_list.append(client.moveByVelocityAsync(0, 0, -20, 5, vehicle_name=j.getName()))
+for j in ins.Agents:
+    f_list.append(client.moveByVelocityAsync(0, 0, -50, 5, vehicle_name=j.getName()))
 
 for f in f_list:
     f.join()
 
+time.sleep(1)
 
-"""
-# airsim.wait_key('Press any key to takeoff')
-f0 = client.takeoffAsync(vehicle_name="Drone0")
-f1 = client.takeoffAsync(vehicle_name="Drone1")
-f2 = client.takeoffAsync(vehicle_name="Drone2")
-f3 = client.takeoffAsync(vehicle_name="Drone3")
+f_list.clear()
 
-f0.join()
-f1.join()
-f2.join()
-f3.join()
+for j in ins.Agents:
+    f_list.append(client.moveByVelocityAsync(0, 0, 0, 1, vehicle_name=j.getName()))
 
-f0 = client.moveByVelocityAsync(0, 0, -20, 5, vehicle_name="Drone0")
-f1 = client.moveByVelocityAsync(0, 0, -20, 5, vehicle_name="Drone1")
-f2 = client.moveByVelocityAsync(0, 0, -20, 5, vehicle_name="Drone2")
-f3 = client.moveByVelocityAsync(0, 0, -20, 5, vehicle_name="Drone3")
+for f in f_list:
+    f.join()
 
-f0.join()
-f1.join()
-f2.join()
-f3.join()
+time.sleep(1)
 
-targetX = [[0, -10, 10, -20], [10, 0, 0, -10], [10, 0, 0, -10], [20, 10, 10, 0]]
-targetY = [[0, 10, -10, 0], [-10, 0, -20, -10], [10, 20, 0, 10], [0, 10, -10, 0]]
-targetZ = [[0] * 4 for i in range(4)]
+f_list.clear()
+
+for j in ins.Agents:
+    agent_cell_center = j.getCurrCell().getCenter()
+    print(agent_cell_center)
+    t = 30
+    v_x = (agent_cell_center[0] - formation.drone_state(j)['x']) / t
+    v_y = (agent_cell_center[1] - formation.drone_state(j)['y']) / t
+    f_list.append(client.moveByVelocityAsync(v_x, v_y, 0, t, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
+
+f_list.clear()
+
+for j in ins.Agents:
+    f_list.append(client.moveByVelocityAsync(0, 0, 0, 1, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
 
 
 def sum_2_dim(myarray):
@@ -91,18 +110,16 @@ def isMove():
 
     errorX, errorY, errorZ = errorfunc(targetX, targetY, targetZ)
 
-    
-
-    if smallerThan(errorX, 13) and smallerThan(errorY, 13):
+    if smallerThan(errorX, 15) and smallerThan(errorY, 15):
         moveable = False
 
     return moveable
 
 
 def errorfunc(targetX, targetY, targetZ):
-    currentX = formation.matrixX()
-    currentY = formation.matrixY()
-    currentZ = formation.matrixZ()
+    currentX = formation.matrixX(ins)
+    currentY = formation.matrixY(ins)
+    currentZ = formation.matrixZ(ins)
 
     errorX = [[0] * 4 for i in range(4)]
     errorY = [[0] * 4 for i in range(4)]
@@ -117,82 +134,161 @@ def errorfunc(targetX, targetY, targetZ):
     return errorX, errorY, errorZ
 
 
-prev_errorX, prev_errorY, prev_errorZ = [[0] * 4 for i in range(4)], [[0] * 4 for i in range(4)], [[0] * 4 for i in
-                                                                                                   range(4)]
+def pid_formation():
+    # Drones are in their initial cells!
 
-while isMove():
-    curr_errorX, curr_errorY, curr_errorZ = errorfunc(targetX, targetY, targetZ)
+    targetX = [[0, -10, 10, -20], [10, 0, 0, -10], [10, 0, 0, -10], [20, 10, 10, 0]]
+    targetY = [[0, 10, -10, 0], [-10, 0, -20, -10], [10, 20, 0, 10], [0, 10, -10, 0]]
+    targetZ = [[0] * 4 for i in range(4)]
 
-    drone0_vx = 0
-    drone0_vy = 0
-    drone0_vz = 0
+    prev_errorX, prev_errorY, prev_errorZ = [[0] * 4 for i in range(4)], [[0] * 4 for i in range(4)], [[0] * 4 for i in
+                                                                                                       range(4)]
+    f_list_for_z = []
+    f_list_for_formation = []
 
-    drone1_vx = 0
-    drone1_vy = 0
-    drone1_vz = 0
+    while isMove():
+        curr_errorX, curr_errorY, curr_errorZ = errorfunc(targetX, targetY, targetZ)
 
-    drone2_vx = 0
-    drone2_vy = 0
-    drone2_vz = 0
+        # drone_vx = 0
+        # drone_vy = 0
+        # drone_vz = 0
 
-    drone3_vx = 0
-    drone3_vy = 0
-    drone3_vz = 0
+        kp = 100
+        kd = 1
 
-    kp = 100
-    kd = 1
-    for i in range(4):
-        if i == 0:
-            drone0_vx = sum(curr_errorX[i]) * kp + kd * (sum(curr_errorX[i]) - sum(prev_errorX[i]))
-            drone0_vy = sum(curr_errorY[i]) * kp + kd * (sum(curr_errorY[i]) - sum(prev_errorY[i]))
-            drone0_vz = sum(curr_errorZ[i]) * kp + kd * (sum(curr_errorZ[i]) - sum(prev_errorZ[i]))
-        elif i == 1:
-            drone1_vx = sum(curr_errorX[i]) * kp + kd * (sum(curr_errorX[i]) - sum(prev_errorX[i]))
-            drone1_vy = sum(curr_errorY[i]) * kp + kd * (sum(curr_errorY[i]) - sum(prev_errorY[i]))
-            drone1_vz = sum(curr_errorZ[i]) * kp + kd * (sum(curr_errorZ[i]) - sum(prev_errorZ[i]))
-        elif i == 2:
-            drone2_vx = sum(curr_errorX[i]) * kp + kd * (sum(curr_errorX[i]) - sum(prev_errorX[i]))
-            drone2_vy = sum(curr_errorY[i]) * kp + kd * (sum(curr_errorY[i]) - sum(prev_errorY[i]))
-            drone2_vz = sum(curr_errorZ[i]) * kp + kd * (sum(curr_errorZ[i]) - sum(prev_errorZ[i]))
-        elif i == 3:
-            drone3_vx = sum(curr_errorX[i]) * kp + kd * (sum(curr_errorX[i]) - sum(prev_errorX[i]))
-            drone3_vy = sum(curr_errorY[i]) * kp + kd * (sum(curr_errorY[i]) - sum(prev_errorY[i]))
-            drone3_vz = sum(curr_errorZ[i]) * kp + kd * (sum(curr_errorZ[i]) - sum(prev_errorZ[i]))
+        for i in range(len(ins.Agents)):
+            drone_vx = sum(curr_errorX[i]) * kp + kd * (sum(curr_errorX[i]) - sum(prev_errorX[i]))
+            drone_vy = sum(curr_errorY[i]) * kp + kd * (sum(curr_errorY[i]) - sum(prev_errorY[i]))
+            drone_vz = sum(curr_errorZ[i]) * kp + kd * (sum(curr_errorZ[i]) - sum(prev_errorZ[i]))
 
-    prev_errorX, prev_errorY, prev_errorZ = curr_errorX, curr_errorY, curr_errorZ
+            f = client.moveByVelocityAsync(0, 0, 0, 0.2, vehicle_name=ins.Agents[i].getName())
+            f_list_for_z.append(f)
 
-    print(prev_errorX)
-    print(prev_errorY)
-    print(prev_errorZ)
-    print("-------------------------------------------")
+            f = client.moveByVelocityAsync(drone_vx, drone_vy, drone_vz, 0.2, vehicle_name=ins.Agents[i].getName())
+            f_list_for_formation.append(f)
 
-    f0 = client.moveByVelocityZAsync(0, 0, -20, 0.2, vehicle_name="Drone0")
-    f1 = client.moveByVelocityZAsync(0, 0, -20, 0.2, vehicle_name="Drone1")
-    f2 = client.moveByVelocityZAsync(0, 0, -20, 0.2, vehicle_name="Drone2")
-    f3 = client.moveByVelocityZAsync(0, 0, -20, 0.2, vehicle_name="Drone3")
+        prev_errorX, prev_errorY, prev_errorZ = curr_errorX, curr_errorY, curr_errorZ
 
-    f0.join()
-    f1.join()
-    f2.join()
-    f3.join()
+        for f in f_list_for_z:
+            f.join()
 
-    time.sleep(0.5)
+        time.sleep(0.5)
 
-    f0 = client.moveByVelocityZAsync(drone0_vx, drone0_vy, drone0_vz, 0.2, vehicle_name="Drone0")
-    f1 = client.moveByVelocityZAsync(drone1_vx, drone1_vy, drone1_vz, 0.2, vehicle_name="Drone1")
-    f2 = client.moveByVelocityZAsync(drone2_vx, drone2_vy, drone2_vz, 0.2, vehicle_name="Drone2")
-    f3 = client.moveByVelocityZAsync(drone3_vx, drone3_vy, drone3_vz, 0.2, vehicle_name="Drone3")
+        for f in f_list_for_formation:
+            f.join()
 
-    f0.join()
-    f1.join()
-    f2.join()
-    f3.join()
+        time.sleep(0.5)
 
-    time.sleep(0.5)
-"""
+        f_list_for_z.clear()
+        f_list_for_formation.clear()
 
-"""
-    if sum(list(map(sum, errorX))) + sum(list(map(sum, errorY))) <= 0:
-        moveable = False
+        for j in ins.Agents:
+            if formation.drone_state(j)['z'] > 0:
+                f = client.moveByVelocityAsync(0, 0, -50, 5, vehicle_name=j.getName())
+                f.join()
+                time.sleep(1)
 
-    """
+    f_list_state_stabil = []
+
+    for j in ins.Agents:
+        f_list_state_stabil.append(client.moveByVelocityAsync(0, 0, 0, 1, vehicle_name=j.getName()))
+
+    for c in f_list_state_stabil:
+        c.join()
+
+    time.sleep(1)
+
+
+pid_formation()
+
+f_list.clear()
+
+for j in ins.Agents:
+    t = 30
+    v_x = (ins.Cells[0].getCenter()[0] - formation.drone_state(j)['x']) / t
+    v_y = (ins.Cells[0].getCenter()[1] - formation.drone_state(j)['y']) / t
+    f_list.append(client.moveByVelocityAsync(v_x, v_y, 0, t, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
+
+f_list.clear()
+
+for j in ins.Agents:
+    f_list.append(client.moveByVelocityAsync(0, 0, 0, 1, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
+
+f_list.clear()
+
+for j in ins.Agents:
+    t = 30
+    v_x = (ins.Cells[9].getCenter()[0] - formation.drone_state(j)['x']) / t
+    v_y = (ins.Cells[9].getCenter()[1] - formation.drone_state(j)['y']) / t
+    f_list.append(client.moveByVelocityAsync(v_x, v_y, 0, t, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
+
+f_list.clear()
+
+for j in ins.Agents:
+    f_list.append(client.moveByVelocityAsync(0, 0, 0, 1, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
+
+f_list.clear()
+
+for j in ins.Agents:
+    t = 30
+    v_x = (ins.Cells[10].getCenter()[0] - formation.drone_state(j)['x']) / t
+    v_y = (ins.Cells[10].getCenter()[1] - formation.drone_state(j)['y']) / t
+    f_list.append(client.moveByVelocityAsync(v_x, v_y, 0, t, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
+
+f_list.clear()
+
+for j in ins.Agents:
+    f_list.append(client.moveByVelocityAsync(0, 0, 0, 1, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
+
+f_list.clear()
+
+for j in ins.Agents:
+    t = 30
+    v_x = (ins.Cells[19].getCenter()[0] - formation.drone_state(j)['x']) / t
+    v_y = (ins.Cells[19].getCenter()[1] - formation.drone_state(j)['y']) / t
+    f_list.append(client.moveByVelocityAsync(v_x, v_y, 0, t, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)
+
+f_list.clear()
+
+for j in ins.Agents:
+    f_list.append(client.moveByVelocityAsync(0, 0, 0, 1, vehicle_name=j.getName()))
+
+for f in f_list:
+    f.join()
+
+time.sleep(1)

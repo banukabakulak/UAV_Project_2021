@@ -1,22 +1,14 @@
-#import Instance
-#import Optimization as OPTI
-import json
-
-from model.Instance import Instance
 from model.Optimization import Optimization
+from model.model_definition.Instance import Instance
 
-ins = Instance()
-ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
-opti = Optimization()
-opti.Stage1()
+instance = Instance()
+instance.readInstance('model_input/Agents.csv')
 
+optimization = Optimization()
+optimization.Stage1(instance)
+optimization.Stage2(instance)
+optimization.Stage3(instance)
 
-
-
-"""
-print(ins.AgentsType)
-print(ins.UGVs)
-print(ins.UAVs)
-print(ins.TypeAgentIndices)
-print(ins.AgentIndexSet)
-"""
+for agent in instance.Agents:
+    print(agent.getName(), 'cell: ')
+    agent.getCurrCell().print()

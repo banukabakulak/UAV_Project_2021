@@ -1,10 +1,9 @@
 import airsim
-from model.Instance import Instance
 
 client = airsim.MultirotorClient()
 
-
 def drone_state(drone):
+
     dronestate = client.getMultirotorState(vehicle_name=drone.getName()).kinematics_estimated.position
     basePosition = drone.getBasePosition()
     x_val = dronestate.x_val + float(basePosition[0])
@@ -58,9 +57,9 @@ def distanceZ(drone1, drone2):
     return dist
 
 
-def matrixX():
-    ins = Instance()
-    ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
+def matrixX(ins):
+    #ins = Instance()
+    #ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
 
     n = len(ins.Agents)
     distance_matrix = [[0] * n for i in range(n)]
@@ -80,9 +79,9 @@ def matrixX():
     return distance_matrix
 
 
-def matrixY():
-    ins = Instance()
-    ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
+def matrixY(ins):
+    #ins = Instance()
+    #ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
 
     n = len(ins.Agents)
     distance_matrix = [[0] * n for i in range(n)]
@@ -102,9 +101,9 @@ def matrixY():
     return distance_matrix
 
 
-def matrixZ():
-    ins = Instance()
-    ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
+def matrixZ(ins):
+    #ins = Instance()
+    #ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
 
     n = len(ins.Agents)
     distance_matrix = [[0] * n for i in range(n)]

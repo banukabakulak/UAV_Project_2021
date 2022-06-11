@@ -1,8 +1,7 @@
-import json
-
-from model.Instance import Instance
 import math
 from docplex.mp.model import Model
+
+from heuristics.Pso import PSO
 
 
 class Optimization():
@@ -16,18 +15,15 @@ class Optimization():
         self.isInCellJ = None
         self.amountOfDataFlow = None
 
-    def Stage1(self):
-        instance = Instance()
-        instance.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
+    def Stage1(self, instance):
+
         swarmModel1 = Model('stage1')
 
         # Define ranges:
-        R_t = range(1, instance.TimePeriod[-1] + 1)
         R_l = instance.TypeAgents
         R_i = instance.AgentIndexSet
 
         # Define IDs:
-        idt = [t for t in R_t]
         idx = []
         for l in R_l:
             for i in range(len(R_i)):
@@ -38,10 +34,6 @@ class Optimization():
         # Define decision variables:
 
         x = swarmModel1.binary_var_dict(idx, name="x")
-
-        # L = swarmModel1.continuous_var(lb=1, ub=instance.planningHorizon, name='L')
-
-        # nt = swarmModel1.binary_var_dict(idt, name='n')
 
         # Define budget constraint:
 
@@ -54,17 +46,6 @@ class Optimization():
                         budgetCons += swarmModel1.sum(instance.AgentsType[l].cost * x[l, a])
 
         swarmModel1.add_constraint(budgetCons <= instance.Budget)
-
-        """
-        # Define lifetime constraint:
-
-        for i in idt:
-            lifeTimeCons = swarmModel1.linear_expr()
-            lifeTimeCons = lifeTimeCons + (i - 1) + instance.planningHorizon * nt[i]
-
-            swarmModel1.add_constraint(L <= lifeTimeCons)
-
-        """
 
         # Define obj func:
 
@@ -119,61 +100,11 @@ class Optimization():
         # solution.display()
 
         # swarmModel1.export_as_lp("swarmModel1.lp")
-        solution.export("C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/solution.json")
-
-    def chosen_tuple(self, string_a):
-        initial = string_a[string_a.index('_') + 1:]
-        index = initial[0:initial.index('_')]
-
-        rest = string_a[string_a.index('_') + 1:]
-        number = rest[rest.index('_') + 1:]
-
-        return index, number
-
-    def chosen_drones(self):
-        ins = Instance()
-        ins.readInstance('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/Agents.csv')
-        self.Stage1()
-
-        filename = 'C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/solution.json'
-
-        chosen_list = []
-        with open(filename) as json_file:
-            data = json.load(json_file)
-            print(data['CPLEXSolution']['variables'])
-
-            for var in data['CPLEXSolution']['variables']:
-                chosen_agent = self.chosen_tuple(var['name'])
-
-                type_0_list = []
-                type_1_list = []
-                type_2_list = []
-
-                for i in range(len(ins.Agents)):
-                    if ins.Agents[i].type == 0:
-                        type_0_list.append(ins.Agents[i])
-                    elif ins.Agents[i].type == 1:
-                        type_1_list.append(ins.Agents[i])
-                    elif ins.Agents[i].type == 2:
-                        type_2_list.append(ins.Agents[i])
-
-                if int(chosen_agent[0]) == 0:
-                    for i in range(len(type_0_list)):
-                        if int(chosen_agent[1]) == i:
-                            chosen_list.append(type_0_list[i])
-                elif int(chosen_agent[0]) == 1:
-                    for i in range(len(type_1_list)):
-                        if int(chosen_agent[1]) == i:
-                            chosen_list.append(type_1_list[i])
-                elif int(chosen_agent[0]) == 2:
-                    for i in range(len(type_2_list)):
-                        if int(chosen_agent[1]) == i:
-                            chosen_list.append(type_2_list[i])
-
-        return chosen_list
+        solution.export('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/model_output/solution.json')
 
     def Stage2(self, instance):
-        chosen_list = self.chosen_drones()
+        filename = 'C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/model_output/solution.json'
+        chosen_list = instance.chosen_drones(filename)
 
         instance.TypeUAV.clear()
         instance.TypeAgents.clear()
@@ -182,28 +113,6 @@ class Optimization():
         instance.Agents.clear()
         instance.TypeAgentIndices.clear()
         instance.AgentIndexSet.clear()
-
-        # to find how many drones we have for each type:
-        drone_0 = 0
-        drone_1 = 0
-        drone_2 = 0
-        for drone in chosen_list:
-            # print("DRONE", drone)
-            if drone.getType() == 0:
-                drone_0 += 1
-            elif drone.getType() == 1:
-                drone_1 += 1
-            elif drone.getType() == 2:
-                drone_2 += 1
-
-        instance.TypeAgentIndices[0] = list(range(0, drone_0))
-        instance.AgentIndexSet.append(instance.TypeAgentIndices.get(0))
-
-        instance.TypeAgentIndices[1] = list(range(0, drone_1))
-        instance.AgentIndexSet.append(instance.TypeAgentIndices.get(1))
-
-        instance.TypeAgentIndices[2] = list(range(0, drone_2))
-        instance.AgentIndexSet.append(instance.TypeAgentIndices.get(2))
 
         for i in chosen_list:
             instance.TypeAgents.append(i.getType()) if i.getType() not in instance.TypeAgents else instance.TypeAgents
@@ -214,8 +123,32 @@ class Optimization():
             else:
                 instance.UGVs.append(i)
 
+        # to find how many drones we have for each type:
+        type_0 = []
+        type_1 = []
+        type_2 = []
+
+        for agent in instance.Agents:
+            if agent.type == 0:
+                type_0.append(agent.indis)
+            else:
+                if agent.type == 1:
+                    type_1.append(agent.indis)
+                elif agent.type == 2:
+                    type_2.append(agent.indis)
+
+        instance.TypeAgentIndices['0'] = list(range(0, len(type_0)))
+        instance.TypeAgentIndices['1'] = list(range(0, len(type_1)))
+        instance.TypeAgentIndices['2'] = list(range(0, len(type_2)))
+
+        instance.AgentIndexSet.append(instance.TypeAgentIndices.get('0'))
+        instance.AgentIndexSet.append(instance.TypeAgentIndices.get('1'))
+        instance.AgentIndexSet.append(instance.TypeAgentIndices.get('2'))
+
         instance.numUAVTypes = len(instance.TypeUAV)
         instance.numTypelAgent = len(instance.TypeAgents)
+
+        # Edge Length Determination:
 
         instance.edgeLengthDetermination()
 
@@ -231,7 +164,7 @@ class Optimization():
         R_t = [0]
         R_l = instance.TypeAgents
         R_i = instance.AgentIndexSet
-        R_j = range(0, len(instance.BoundryCells))
+        R_j = range(0, len(instance.BoundaryCells))
 
         # Define IDs:
         idt = [t for t in R_t]
@@ -241,16 +174,8 @@ class Optimization():
                 if l == i:
                     for a in R_i[i]:
                         idx.append((l, a))
-
         idj = [j for j in R_j]
-
         idz = [(x, y, j, t) for x, y in idx for j in R_j for t in R_t]
-
-        print('idt', idt)
-        print('idx', idx)
-        print('idj', idj)
-        print('idz', idz)
-        print('idz', idz[2][2])
 
         # Define decision variables:
         z = swarmModel2.binary_var_dict(idz, name="z")
@@ -273,6 +198,20 @@ class Optimization():
                 assignment_3 += swarmModel2.sum(z[x, y, j, 0])
             swarmModel2.add_constraint(assignment_3 <= 1)
 
+        # Alpha Connectedness:
+
+        b_matrix = instance.matrixWithinCommRangeCellJAgentTypeL()
+
+        for j in idj:
+            for x, y in idx:
+                alpha_connectedness = swarmModel2.linear_expr()
+                for (l, i, k, t) in idz:
+                    if (l, i) != (x, y) and j != k:
+                        a = b_matrix.loc[[(x, l)], [(j, k)]]
+                        b_value = a[(j, k)].iloc[0]
+                        alpha_connectedness += swarmModel2.sum(b_value * z[l, i, k, t])
+                swarmModel2.add_constraint(alpha_connectedness >= instance.alpha * z[x, y, j, 0])
+
         # Define obj func:
         distance_matrix = instance.distanceBtwBaseLocationAndBoundaryCells()
 
@@ -286,15 +225,53 @@ class Optimization():
 
         # Objective Function:
         swarmModel2.minimize(obj_func_value)
-        print(swarmModel2.export_to_string())
-        swarmModel2.print_information()
+        # print(swarmModel2.export_to_string())
+        # swarmModel2.print_information()
 
         solution2 = swarmModel2.solve(log_output=False)
         # assert solution, "solve failed"
-        #swarmModel2.report()
-        solution2.display()
+        # swarmModel2.report()
+        # solution2.display()
 
         # swarmModel1.export_as_lp("swarmModel1.lp")
-        # solution2.export("C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/solution2.json")
+        solution2.export('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/model_output/solution2.json')
 
+        # Initialize the location after obtain the result of unbalanced assignment problem.
+        instance.initialLocation('C:/Users/ertug/OneDrive/Masaüstü/swarm2022/model/model_output/solution2.json')
 
+        # apply Particle Swarm Optimization to obtain fully connected swarm:
+        #PSO(instance, MaxIt=100, nPop=1, w=1, wdamp=0.99, c1=2, c2=2)
+
+        for i in range(len(instance.Agents)):
+            a = instance.findCellFromId(1)
+            b = instance.findCellFromId(2)
+            c = instance.findCellFromId(3)
+            d = instance.findCellFromId(0)
+
+            if i == 0:
+                instance.Agents[i].setCurrCell(a)
+            if i == 1:
+                instance.Agents[i].setCurrCell(b)
+            if i == 2:
+                instance.Agents[i].setCurrCell(c)
+            if i == 3:
+                instance.Agents[i].setCurrCell(d)
+
+    def Stage3(self, instance):
+        comm_matrix = instance.connectivity_matrix()
+        dist_matrix = instance.distanceMatrixOfAgents(instance.communicationGraph())
+        r_list = []
+
+        for agent in instance.Agents:
+            agent_ID = agent.getName().replace('Drone', '')
+            total = 0
+            r = 0
+            for agent2 in instance.Agents:
+                agent2_ID = agent2.getName().replace('Drone', '')
+                if agent.getName() != agent2.getName() and comm_matrix.loc[agent_ID, agent2_ID] == 1:
+                    total += dist_matrix.loc[agent_ID, agent2_ID]
+
+            r = (agent.getRComm() * agent.getRemEnergy()) / (total * agent.getCost())
+            r_list.append(r)
+
+        instance.Agents[r_list.index(max(r_list))].makeLeader()

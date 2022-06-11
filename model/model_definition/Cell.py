@@ -1,5 +1,5 @@
 
-class Cell():
+class Cell:
     def __init__(self):
         self.Id = None
         self.row = None
@@ -23,12 +23,21 @@ class Cell():
 
     def print(self):
         print(
-            f'id {self.Id}, center {self.center}, corner1 {self.corner1}, corner2 {self.corner2}, corner3 {self.corner3}, corner4 {self.corner4}, row {self.row}, col {self.col} ')
+            f"id {self.Id}, center {self.center}, corner1 {self.corner1}, corner2 {self.corner2}, " 
+            f"corner3 {self.corner3}, corner4 {self.corner4}, row {self.row}, col {self.col} ")
 
     def printID(self):
         print(f'id {self.Id}')
 
     def getID(self):
         return int(self.Id)
+
+    def getCenter(self):
+        return self.center
+
+    def isInCell(self, x, y):
+        if self.corner2[0] >= x >= self.corner1[0] and self.corner4[1] >= y >= self.corner1[1]:
+            return True
+
 
 
